@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "771958384951",
+    "firebase_url": "https://fairy-hell.firebaseio.com",
+    "project_id": "fairy-hell",
+    "storage_bucket": "fairy-hell.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:771958384951:android:adab4ce2a814fb05",
+        "android_client_info": {
+          "package_name": "com.alixf.fairyhell"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "771958384951-8qtcccqeeehq6fps3orie41khjdgggb2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC7QGhVLKB8NzwAyx_o0RNYV3JeL-wOlPM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "771958384951-8qtcccqeeehq6fps3orie41khjdgggb2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

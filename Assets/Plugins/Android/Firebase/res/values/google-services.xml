@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources tools:keep="@string/firebase_database_url,@string/gcm_defaultSenderId,@string/google_storage_bucket,@string/project_id,@string/google_api_key,@string/google_crash_reporting_api_key,@string/google_app_id,@string/default_web_client_id" xmlns:tools="http://schemas.android.com/tools">
+  <string name="firebase_database_url" translatable="false">https://fairy-hell.firebaseio.com</string>
+  <string name="gcm_defaultSenderId" translatable="false">771958384951</string>
+  <string name="google_storage_bucket" translatable="false">fairy-hell.appspot.com</string>
+  <string name="project_id" translatable="false">fairy-hell</string>
+  <string name="google_api_key" translatable="false">AIzaSyC7QGhVLKB8NzwAyx_o0RNYV3JeL-wOlPM</string>
+  <string name="google_crash_reporting_api_key" translatable="false">AIzaSyC7QGhVLKB8NzwAyx_o0RNYV3JeL-wOlPM</string>
+  <string name="google_app_id" translatable="false">1:771958384951:android:adab4ce2a814fb05</string>
+  <string name="default_web_client_id" translatable="false">771958384951-8qtcccqeeehq6fps3orie41khjdgggb2.apps.googleusercontent.com</string>
+</resources>
