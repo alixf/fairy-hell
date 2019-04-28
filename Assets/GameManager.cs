@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UniRx.Async;
 using System.Threading.Tasks;
+#if !UNITY_WEBGL
 using Firebase;
 using Firebase.Database;
 using Firebase.Unity.Editor;
+#endif
 using System;
 using UnityEngine.UI;
 using System.Linq;
@@ -32,6 +34,8 @@ public class GameManager : MonoBehaviour
 
     public static GameManager instance;
 
+    Boolean playing = false;
+
     void Awake()
     {
         if (instance != null)
@@ -41,12 +45,17 @@ public class GameManager : MonoBehaviour
         else
         {
             instance = this;
+            #if !UNITY_WEBGL
             FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://fairy-hell.firebaseio.com/");
+            #endif
         }
     }
 
     async void Start()
     {
+        #if UNITY_WEBGL
+        scores.gameObject.SetActive(false);
+        #endif
         textInput.SetActive(false);
         logo.alpha = 0f;
         play.alpha = 0f;
@@ -71,6 +80,7 @@ public class GameManager : MonoBehaviour
     Coroutine scoreCoroutine;
     public async void Play()
     {
+        playing = true;
         textInput.SetActive(false);
         currentScore = 0;
         scoreCoroutine = StartCoroutine(ScoreUpdate());
@@ -87,8 +97,10 @@ public class GameManager : MonoBehaviour
         await Coroutines.Delay(0.05f);
         StartCoroutine(Coroutines.LerpOverTime(1f, 0f, 0.2f, f => play.transform.localScale = Vector3.one * f));
         await Coroutines.Delay(0.05f);
+        #if !UNITY_WEBGL
         StartCoroutine(Coroutines.LerpOverTime(1f, 0f, 0.2f, f => scores.transform.localScale = Vector3.one * f));
         await Coroutines.Delay(0.05f);
+        #endif
         StartCoroutine(Coroutines.LerpOverTime(1f, 0f, 0.2f, f => quit.transform.localScale = Vector3.one * f));
         await Coroutines.Delay(1f);
 
@@ -118,6 +130,10 @@ public class GameManager : MonoBehaviour
 
     public async void GameOver()
     {
+        if(!playing) {
+            return;
+        }
+        playing = false;
         StopCoroutine(scoreCoroutine);
         SaveScore(playerName, Mathf.FloorToInt(currentScore));
         currentScore = 0f;
@@ -139,8 +155,10 @@ public class GameManager : MonoBehaviour
         await Coroutines.Delay(1f);
         StartCoroutine(Coroutines.LerpOverTime(0f, 1f, 0.33f, f => play.alpha = f));
         await Coroutines.Delay(0.2f);
+        #if UNITY_WEBGL
         StartCoroutine(Coroutines.LerpOverTime(0f, 1f, 0.33f, f => scores.alpha = f));
         await Coroutines.Delay(0.2f);
+        #endif
         StartCoroutine(Coroutines.LerpOverTime(0f, 1f, 0.33f, f => quit.alpha = f));
         textInput.SetActive(true);
     }
@@ -156,7 +174,8 @@ public class GameManager : MonoBehaviour
     }
 
     public Task SaveScore(string name, int score)
-    {
+    {   
+        #if !UNITY_WEBGL
         DatabaseReference database = FirebaseDatabase.DefaultInstance.RootReference;
         string key = database.Child("scores").Push().Key;
 		Dictionary<string, string> scoreDict = new Dictionary<string, string>();
@@ -165,10 +184,14 @@ public class GameManager : MonoBehaviour
         Dictionary<string, System.Object> childUpdates = new Dictionary<string, System.Object>();
         childUpdates["/scores/" + key] = new Score(name, score).ToDictionary();
         return database.UpdateChildrenAsync(childUpdates);
+        #else
+        return Task.CompletedTask;
+        #endif
     }
 
     public async Task<List<Score>> GetScores()
     {
+        #if !UNITY_WEBGL
         DatabaseReference database = FirebaseDatabase.DefaultInstance.RootReference;
         var data = await database.Child("scores").OrderByChild("score").LimitToLast(10).GetValueAsync();
         var  t= data.Value as Dictionary<string, System.Object>;
@@ -181,6 +204,9 @@ public class GameManager : MonoBehaviour
             ));
         }
 		return result.OrderBy(a => -a.score).Take(10).ToList();
+        #else
+        return new List<Score>();
+        #endif
     }
 }
 
