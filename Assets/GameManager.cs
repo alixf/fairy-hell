@@ -97,7 +97,7 @@ public class GameManager : MonoBehaviour
         await Coroutines.Delay(0.05f);
         StartCoroutine(Coroutines.LerpOverTime(1f, 0f, 0.2f, f => play.transform.localScale = Vector3.one * f));
         await Coroutines.Delay(0.05f);
-        #if !UNITY_WEBGL
+        #if  !UNITY_WEBGL
         StartCoroutine(Coroutines.LerpOverTime(1f, 0f, 0.2f, f => scores.transform.localScale = Vector3.one * f));
         await Coroutines.Delay(0.05f);
         #endif
@@ -155,7 +155,7 @@ public class GameManager : MonoBehaviour
         await Coroutines.Delay(1f);
         StartCoroutine(Coroutines.LerpOverTime(0f, 1f, 0.33f, f => play.alpha = f));
         await Coroutines.Delay(0.2f);
-        #if UNITY_WEBGL
+        #if !UNITY_WEBGL
         StartCoroutine(Coroutines.LerpOverTime(0f, 1f, 0.33f, f => scores.alpha = f));
         await Coroutines.Delay(0.2f);
         #endif
@@ -176,14 +176,19 @@ public class GameManager : MonoBehaviour
     public Task SaveScore(string name, int score)
     {   
         #if !UNITY_WEBGL
-        DatabaseReference database = FirebaseDatabase.DefaultInstance.RootReference;
-        string key = database.Child("scores").Push().Key;
-		Dictionary<string, string> scoreDict = new Dictionary<string, string>();
-        scoreDict["name"] = name;
-        scoreDict["score"] = score.ToString();
-        Dictionary<string, System.Object> childUpdates = new Dictionary<string, System.Object>();
-        childUpdates["/scores/" + key] = new Score(name, score).ToDictionary();
-        return database.UpdateChildrenAsync(childUpdates);
+        try {
+            DatabaseReference database = FirebaseDatabase.DefaultInstance.RootReference;
+            string key = database.Child("scores").Push().Key;
+            Dictionary<string, string> scoreDict = new Dictionary<string, string>();
+            scoreDict["name"] = name;
+            scoreDict["score"] = score.ToString();
+            Dictionary<string, System.Object> childUpdates = new Dictionary<string, System.Object>();
+            childUpdates["/scores/" + key] = new Score(name, score).ToDictionary();
+            return database.UpdateChildrenAsync(childUpdates);
+        } catch(Exception error) {
+            Debug.LogError(error);
+            return Task.CompletedTask;
+        }
         #else
         return Task.CompletedTask;
         #endif
@@ -192,18 +197,23 @@ public class GameManager : MonoBehaviour
     public async Task<List<Score>> GetScores()
     {
         #if !UNITY_WEBGL
-        DatabaseReference database = FirebaseDatabase.DefaultInstance.RootReference;
-        var data = await database.Child("scores").OrderByChild("score").LimitToLast(10).GetValueAsync();
-        var  t= data.Value as Dictionary<string, System.Object>;
-        var result = new List<Score>();
-		foreach(var t1 in t) {
-            var t11 = (t1.Value as Dictionary<string, System.Object>);
-            result.Add(new Score(
-                t11["name"] as string,
-                Convert.ToInt32(t11["score"])
-            ));
+        try {
+            DatabaseReference database = FirebaseDatabase.DefaultInstance.RootReference;
+            var data = await database.Child("scores").OrderByChild("score").LimitToLast(10).GetValueAsync();
+            var  t= data.Value as Dictionary<string, System.Object>;
+            var result = new List<Score>();
+            foreach(var t1 in t) {
+                var t11 = (t1.Value as Dictionary<string, System.Object>);
+                result.Add(new Score(
+                    t11["name"] as string,
+                    Convert.ToInt32(t11["score"])
+                ));
+            }
+            return result.OrderBy(a => -a.score).Take(10).ToList();
+        } catch(Exception error) {
+            Debug.LogError(error);
+            return new List<Score>();
         }
-		return result.OrderBy(a => -a.score).Take(10).ToList();
         #else
         return new List<Score>();
         #endif
